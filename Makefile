@@ -2,7 +2,7 @@ CC = gcc
 OPTIONS = -Wall -Wextra -std=c11
 EXE = motcache
 
-motcache: motcache.c
+motcache: motcache.c motcache.h
 	$(CC) $(OPTIONS) motcache.c -o $(EXE)
 
 test: motcache
