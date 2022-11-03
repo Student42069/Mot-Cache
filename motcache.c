@@ -99,7 +99,7 @@ void update_unused_letters(char *unused_letters, unsigned int *used_positions, i
 	}
 }
 
-unsigned int check_next(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+unsigned int check(char *word, char *puzzle, char *unused_letters, unsigned int position, unsigned int direction) {
 	char found[13] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 	found[0] = puzzle[position];
 	unsigned int used_positions[MAX_WORD_LENGTH];
@@ -107,95 +107,7 @@ unsigned int check_next(char *word, char *puzzle, char *unused_letters, unsigned
 	// printf("%s", found);
 	// printf("%s\n", word);
 	while (strstr(word, found) != NULL) {
-		position++;
-		used_positions[strlen(found)] = position;
-		char cToStr[2];
-		cToStr[1] = '\0';
-		cToStr[0] = puzzle[position];
-		// printf("%s", cToStr);
-		// if (position % 12 == 0){
-		// 	puts("AH bizarree!!!!!!!!!!!!!!!!!!!");
-		// 	break;
-		// }
-		strcat(found, cToStr);
-		// printf("%s : %s : %d : %d\n", found, word, (int)strlen(found), (int)strlen(word));
-		if (strcmp(word, found) == 0) {
-			// puts("Trouve !!");
-			update_unused_letters(unused_letters, used_positions, (int)strlen(found));
-			return 1;
-		}
-	}
-	// puts("Non !");
-	return 0;
-}
-
-unsigned int check_previous(char *word, char *puzzle, char *unused_letters, unsigned int position) {
-	char found[13] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
-	found[0] = puzzle[position];
-	unsigned int used_positions[MAX_WORD_LENGTH];
-	used_positions[0] = position;
-	// printf("%s", found);
-	// printf("%s\n", word);
-	while (strstr(word, found) != NULL) {
-		position--;
-		used_positions[strlen(found)] = position;
-		char cToStr[2];
-		cToStr[1] = '\0';
-		cToStr[0] = puzzle[position];
-		// printf("%s", cToStr);
-		// if (position % 12 == 0)
-		// 	break;
-		
-		strcat(found, cToStr);
-		// printf("%s : %s : %d : %d\n", found, word, (int)strlen(found), (int)strlen(word));
-		if (strcmp(word, found) == 0) {
-			// puts("Trouve !!");
-			update_unused_letters(unused_letters, used_positions, (int)strlen(found));
-			return 1;
-		}
-	}
-	// puts("Non !");
-	return 0;
-}
-
-unsigned int check_down(char *word, char *puzzle, char *unused_letters, unsigned int position) {
-	char found[13] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
-	found[0] = puzzle[position];
-	unsigned int used_positions[MAX_WORD_LENGTH];
-	used_positions[0] = position;
-	// printf("%s", found);
-	// printf("%s\n", word);
-	while (strstr(word, found) != NULL) {
-		position = position + 12;
-		used_positions[strlen(found)] = position;
-		char cToStr[2];
-		cToStr[1] = '\0';
-		cToStr[0] = puzzle[position];
-		// printf("%s", cToStr);
-		// if (position % 12 == 0)
-		// 	break;
-		
-		strcat(found, cToStr);
-		// printf("%s : %s : %d : %d\n", found, word, (int)strlen(found), (int)strlen(word));
-		if (strcmp(word, found) == 0) {
-			// puts("Trouve !!");
-			update_unused_letters(unused_letters, used_positions, (int)strlen(found));
-			return 1;
-		}
-	}
-	// puts("Non !");
-	return 0;
-}
-
-unsigned int check_up(char *word, char *puzzle, char *unused_letters, unsigned int position) {
-	char found[13] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
-	found[0] = puzzle[position];
-	unsigned int used_positions[MAX_WORD_LENGTH];
-	used_positions[0] = position;
-	// printf("%s", found);
-	// printf("%s\n", word);
-	while (strstr(word, found) != NULL) {
-		position = position - 12;
+		position = position + direction;
 		used_positions[strlen(found)] = position;
 		char cToStr[2];
 		cToStr[1] = '\0';
@@ -223,23 +135,23 @@ unsigned int search_word(char *word, char *puzzle, char *unused_letters) {
 		if (puzzle[position] == word[0]) {
 			// printf("%d : %c\n", position, puzzle[0]);
 			if ((12 - (position % 12)) >= strlen(word))
-				if (check_next(word, puzzle, unused_letters, position)) {
-					printf("Mot trouve horizontal -->> !! : %s\n", word);
+				if (check(word, puzzle, unused_letters, position, RIGHT)) {
+					// printf("Mot trouve horizontal -->> !! : %s\n", word);
 					return 1;
 				}
 			if (((position % 12) + 1) >= strlen(word))
-				if (check_previous(word, puzzle, unused_letters, position)) {
-					printf("Mot trouve horizontal <<-- !! : %s\n", word);
+				if (check(word, puzzle, unused_letters, position, LEFT)) {
+					// printf("Mot trouve horizontal <<-- !! : %s\n", word);
 					return 1;
 				}
 			if (((position / 12) + 1) >= strlen(word))
-				if (check_up(word, puzzle, unused_letters, position)) {
-					printf("Mot trouve vertical vers le haut !! : %s\n", word);
+				if (check(word, puzzle, unused_letters, position, UP)) {
+					// printf("Mot trouve vertical vers le haut !! : %s\n", word);
 					return 1;
 				}
 			if (12 - ((position / 12) >= strlen(word)))
-				if (check_down(word, puzzle, unused_letters, position)) {
-					printf("Mot trouve vertical vers le bas !! : %s\n", word);
+				if (check(word, puzzle, unused_letters, position, DOWN)) {
+					// printf("Mot trouve vertical vers le bas !! : %s\n", word);
 					return 1;
 				}
 		}
@@ -250,7 +162,7 @@ unsigned int search_word(char *word, char *puzzle, char *unused_letters) {
 void print_unused_letters(char *unused_letters) {
 	long unsigned int i;
 	for (i = 0; i < strlen(unused_letters); ++i)
-		// if (unused_letters[i] != ' ')
+		if (unused_letters[i] != ' ')
 			printf("%c", unused_letters[i]);
 	puts("");
 }
@@ -270,7 +182,7 @@ int main(int argc, char *argv[]) {
 	checkargs(argc);
 	char puzzle[PUZZLE_LENGTH + 1];
 	load_puzzle(puzzle, argv[1]);
-	printtest(puzzle);
+	// printtest(puzzle);
 	unsigned int num_words = count_words(argv[1]);
 	// printf("%d", num_words);
 	char words[num_words][MAX_WORD_LENGTH + 1];
