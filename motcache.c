@@ -28,7 +28,6 @@ void checkargs(int argc) {
 void load_puzzle(char *puzzle, char *file_name) {
 	FILE *fp = open_file(file_name);
 	char buffer[MAX_WORD_LENGTH + 2];
-	// puzzle[0] = '\0';
 	for (unsigned int i = 0; i < PUZZLE_LENGTH / MAX_WORD_LENGTH; ++i) {
 		fgets(buffer, MAX_WORD_LENGTH + 2, fp);
 		buffer[strlen(buffer)- 1] = '\0';
@@ -36,11 +35,6 @@ void load_puzzle(char *puzzle, char *file_name) {
 	}
 	close_file(fp);
 }
-
-// void printtest(char *puzzle) {
-//     printf("%s\n", puzzle);
-//     printf("%d\n", (int)strlen(puzzle));
-// }
 
 unsigned int count_words(char *file_name) {
 	FILE *fp = open_file(file_name);
@@ -81,13 +75,6 @@ void load_word(char words[][MAX_WORD_LENGTH + 1], FILE *fp, char *buffer) {
 	}
 }
 
-// void print_words(char words[][MAX_WORD_LENGTH + 1], unsigned int num_words) {
-// 	unsigned int i;
-// 	for (i = 0; i < num_words; ++i) {
-// 		printf("%s\n", words[i]);
-// 	}
-// }
-
 void update_unused_letters(char *unused_letters, unsigned int *used_positions, unsigned int num_found) {
     unsigned int i;
 	for (i = 0; i < num_found; ++i)
@@ -95,47 +82,58 @@ void update_unused_letters(char *unused_letters, unsigned int *used_positions, u
 }
 
 unsigned int check(char *word, char *puzzle, char *unused_letters, unsigned int position, unsigned int direction) {
-	char found[13] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
-	found[0] = puzzle[position];
-	unsigned int used_positions[MAX_WORD_LENGTH];
-	used_positions[0] = position;
-	while (strstr(word, found) != NULL) {
+	char found[13] = {puzzle[position]};
+	unsigned int used_positions[MAX_WORD_LENGTH] = {position};
+	while (strstr(word, found)) {
 		position = position + direction;
 		used_positions[strlen(found)] = position;
-		char cToStr[2];
-		cToStr[1] = '\0';
-		cToStr[0] = puzzle[position];
-		strcat(found, cToStr);
+		char char_to_string[2] = {puzzle[position], '\0'};
+		strcat(found, char_to_string);
 		if (strcmp(word, found) == 0) {
-			update_unused_letters(unused_letters, used_positions, (int)strlen(found));
+			update_unused_letters(unused_letters, used_positions, (int) strlen(found));
 			return 1;
 		}
 	}
 	return 0;
 }
 
+unsigned int check_right(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+	if ((12 - (position % 12)) >= strlen(word))
+		if (check(word, puzzle, unused_letters, position, RIGHT))
+			return 1;
+	return 0;
+}
+
+unsigned int check_left(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+	if (((position % 12) + 1) >= strlen(word))
+		if (check(word, puzzle, unused_letters, position, LEFT))
+			return 1;
+	return 0;
+}
+
+unsigned int check_up(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+	if (((position / 12) + 1) >= strlen(word))
+		if (check(word, puzzle, unused_letters, position, UP))
+			return 1;
+	return 0;
+}
+
+unsigned int check_down(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+	if (12 - ((position / 12) >= strlen(word)))
+		if (check(word, puzzle, unused_letters, position, DOWN))
+			return 1;
+	return 0;
+}
+
 unsigned int search_word(char *word, char *puzzle, char *unused_letters) {
 	unsigned int position;
-	for (position = 0; position < strlen(puzzle); ++position) {
+	for (position = 0; position < strlen(puzzle); ++position)
 		if (puzzle[position] == word[0]) {
-			if ((12 - (position % 12)) >= strlen(word))
-				if (check(word, puzzle, unused_letters, position, RIGHT)) {
-					return 1;
-				}
-			if (((position % 12) + 1) >= strlen(word))
-				if (check(word, puzzle, unused_letters, position, LEFT)) {
-					return 1;
-				}
-			if (((position / 12) + 1) >= strlen(word))
-				if (check(word, puzzle, unused_letters, position, UP)) {
-					return 1;
-				}
-			if (12 - ((position / 12) >= strlen(word)))
-				if (check(word, puzzle, unused_letters, position, DOWN)) {
-					return 1;
-				}
+			if (check_right(word, puzzle, unused_letters, position)) return 1;
+			if (check_left(word, puzzle, unused_letters, position)) return 1;
+			if (check_up(word, puzzle, unused_letters, position)) return 1;
+			if (check_down(word, puzzle, unused_letters, position)) return 1;
 		}
-	}
 	return 0;
 }
 
@@ -161,13 +159,9 @@ int main(int argc, char *argv[]) {
 	checkargs(argc);
 	char puzzle[PUZZLE_LENGTH + 1] = "\0";
 	load_puzzle(puzzle, argv[1]);
-	// printtest(puzzle);
 	unsigned int num_words = count_words(argv[1]);
-	// printf("%d", num_words);
 	char words[num_words][MAX_WORD_LENGTH + 1];
 	load_words(words, argv[1]);
-	// print_words(words, num_words);
 	solve_puzzle(puzzle, words, num_words);
-	// printtest(puzzle);
 	return 0;
 }
