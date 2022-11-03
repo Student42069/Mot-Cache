@@ -49,3 +49,7 @@ void load_puzzle(char *puzzle, char *file_name);
 void load_words(char words[][MAX_WORD_LENGTH + 1], char *file_name);
 
 void load_word(char words[][MAX_WORD_LENGTH + 1], FILE *fp, char *buffer);
+
+void print_unused_letters(char *unused_letters);
+
+

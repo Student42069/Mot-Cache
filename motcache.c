@@ -28,6 +28,8 @@ void checkargs(int argc) {
 void load_puzzle(char *puzzle, char *file_name) {
 	FILE *fp = open_file(file_name);
 	char buffer[MAX_WORD_LENGTH + 2];
+	puzzle[0] = '\0';
+	// printf("%s\n", puzzle);
 	for (unsigned int i = 0; i < PUZZLE_LENGTH / MAX_WORD_LENGTH; ++i) {
 		fgets(buffer, MAX_WORD_LENGTH + 2, fp);
 		buffer[strlen(buffer)- 1] = '\0';
@@ -36,10 +38,10 @@ void load_puzzle(char *puzzle, char *file_name) {
 	close_file(fp);
 }
 
-// void printtest(char *puzzle) {
-//     printf("%s\n", puzzle);
-//     printf("%d", (int)strlen(puzzle));
-// }
+void printtest(char *puzzle) {
+    printf("%s\n", puzzle);
+    printf("%d\n", (int)strlen(puzzle));
+}
 
 unsigned int count_words(char *file_name) {
 	FILE *fp = open_file(file_name);
@@ -89,16 +91,76 @@ void print_words(char words[][MAX_WORD_LENGTH + 1], unsigned int num_words) {
 	}
 }
 
+void check_next(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+	char found[13] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+	found[0] = puzzle[position];
+	// printf("%s", found);
+	// printf("%s\n", word);
+	while (strstr(word, found) != NULL) {
+		position++;
+		char cToStr[2];
+		cToStr[1] = '\0';
+		cToStr[0] = puzzle[position];
+		// printf("%s", cToStr);
+		if (position % 12 == 0)
+			break;
+		
+		strcat(found, cToStr);
+		// printf("%s : %s : %d : %d\n", found, word, (int)strlen(found), (int)strlen(word));
+		if (strcmp(word, found) == 0) {
+			puts("Trouve !!");
+			break;
+		}
+	}
+
+	puts("Non !");
+}
+
+void search_word(char *word, char *puzzle, char *unused_letters) {
+	// printf("%d", (int)strlen(word));
+	unsigned int position;
+	for (position = 0; position < strlen(puzzle); ++position) {
+		if (puzzle[position] == word[0]) {
+			// printf("%d : %c\n", position, puzzle[0]);
+			if ((12 - (position % 12)) >= strlen(word))
+				check_next(word, puzzle, unused_letters, position);
+			// if (((position % 12) + 1) >= strlen(word))
+			// 	check_previous();
+			// if (((position / 12) + 1) >= strlen(word))
+			// 	check_up();
+			// if (12 - ((position / 12) >= strlen(word)))
+			// 	check_down();
+		}
+	}
+}
+
+void print_unused_letters(char *unused_letters) {
+	long unsigned int i;
+	for (i = 0; i < strlen(unused_letters); ++i)
+		if (unused_letters[i] != '\0')
+			printf("%c", unused_letters[i]);
+}
+
+void solve_puzzle(char *puzzle, char words[][MAX_WORD_LENGTH + 1], unsigned int num_words) {
+	char unused_letters[strlen(puzzle)];
+	strcpy(unused_letters, puzzle);
+	unsigned int i;
+	// printf("%d", (int) num_words);
+	for (i = 0; i < num_words; i++)
+		search_word(words[i], puzzle, unused_letters);
+	// print_unused_letters(unused_letters);
+}
+
 int main(int argc, char *argv[]) {
 	checkargs(argc);
 	char puzzle[PUZZLE_LENGTH + 1];
 	load_puzzle(puzzle, argv[1]);
 	// printtest(puzzle);
-	// unsigned int num_words = count_words(argv[1]);
+	unsigned int num_words = count_words(argv[1]);
 	// printf("%d", num_words);
-	char words[count_words(argv[1])][MAX_WORD_LENGTH + 1];
+	char words[num_words][MAX_WORD_LENGTH + 1];
 	load_words(words, argv[1]);
 	// print_words(words, num_words);
-	
+	solve_puzzle(puzzle, words, num_words);
 	return 0;
 }
