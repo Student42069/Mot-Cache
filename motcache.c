@@ -91,7 +91,7 @@ void print_words(char words[][MAX_WORD_LENGTH + 1], unsigned int num_words) {
 	}
 }
 
-void check_next(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+unsigned int check_next(char *word, char *puzzle, char *unused_letters, unsigned int position) {
 	char found[13] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 	found[0] = puzzle[position];
 	// printf("%s", found);
@@ -108,22 +108,25 @@ void check_next(char *word, char *puzzle, char *unused_letters, unsigned int pos
 		strcat(found, cToStr);
 		// printf("%s : %s : %d : %d\n", found, word, (int)strlen(found), (int)strlen(word));
 		if (strcmp(word, found) == 0) {
-			puts("Trouve !!");
-			break;
+			// puts("Trouve !!");
+			return 1;
 		}
 	}
-
-	puts("Non !");
+	// puts("Non !");
+	return 0;
 }
 
-void search_word(char *word, char *puzzle, char *unused_letters) {
+unsigned int search_word(char *word, char *puzzle, char *unused_letters) {
 	// printf("%d", (int)strlen(word));
 	unsigned int position;
 	for (position = 0; position < strlen(puzzle); ++position) {
 		if (puzzle[position] == word[0]) {
 			// printf("%d : %c\n", position, puzzle[0]);
 			if ((12 - (position % 12)) >= strlen(word))
-				check_next(word, puzzle, unused_letters, position);
+				if (check_next(word, puzzle, unused_letters, position)){
+					printf("Mot trouve horizontal -->> !! : %s\n", word);
+					return 1;
+				}
 			// if (((position % 12) + 1) >= strlen(word))
 			// 	check_previous();
 			// if (((position / 12) + 1) >= strlen(word))
@@ -132,6 +135,7 @@ void search_word(char *word, char *puzzle, char *unused_letters) {
 			// 	check_down();
 		}
 	}
+	return 0;
 }
 
 void print_unused_letters(char *unused_letters) {
@@ -147,7 +151,8 @@ void solve_puzzle(char *puzzle, char words[][MAX_WORD_LENGTH + 1], unsigned int 
 	unsigned int i;
 	// printf("%d", (int) num_words);
 	for (i = 0; i < num_words; i++)
-		search_word(words[i], puzzle, unused_letters);
+		if (!search_word(words[i], puzzle, unused_letters))
+			printf("Un mot n'a pas ete trouve, cela ne devrait pas se produire :( %s", words[i]);
 	// print_unused_letters(unused_letters);
 }
 
