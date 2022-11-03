@@ -31,25 +31,31 @@ enum error {
  * Function prototypes
  * -----------------------
  */
-
-unsigned int count_words(char *file_name);
+ 
+void close_file(FILE *file);
 
 FILE* open_file(const char *filename);
 
-void close_file(FILE *file);
-
 void checkargs(int argc);
+
+void load_puzzle(char *puzzle, char *file_name);
+
+unsigned int count_words(char *file_name);
 
 unsigned int count_only_words(FILE *fp, char *buffer);
 
 void forward_puzzle(FILE *fp, char *buffer);
 
-void load_puzzle(char *puzzle, char *file_name);
-
 void load_words(char words[][MAX_WORD_LENGTH + 1], char *file_name);
 
 void load_word(char words[][MAX_WORD_LENGTH + 1], FILE *fp, char *buffer);
 
+void update_unused_letters(char *unused_letters, unsigned int *used_positions, unsigned int num_found);
+
+unsigned int check(char *word, char *puzzle, char *unused_letters, unsigned int position, unsigned int direction);
+
+unsigned int search_word(char *word, char *puzzle, char *unused_letters)
+
 void print_unused_letters(char *unused_letters);
 
-
+void solve_puzzle(char *puzzle, char words[][MAX_WORD_LENGTH + 1], unsigned int num_words);
