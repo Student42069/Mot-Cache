@@ -38,34 +38,35 @@ void load_puzzle(char *puzzle, char *file_name) {
 
 unsigned int count_words(char *file_name) {
 	FILE *fp = open_file(file_name);
-	char buffer[MAX_WORD_LENGTH + 2];
-	forward_puzzle(fp, buffer);
-	unsigned int count = count_only_words(fp, buffer);
+	forward_puzzle(fp);
+	unsigned int count = count_only_words(fp);
 	close_file(fp);
 	return count;
 }
 
-unsigned int count_only_words(FILE *fp, char *buffer) {
+unsigned int count_only_words(FILE *fp) {
+	char buffer[MAX_WORD_LENGTH + 2];
 	unsigned int count = 0;
 	while (fgets(buffer, MAX_WORD_LENGTH + 1, fp))
 		if (strlen(buffer) > 1 || (strlen(buffer) == 1 && buffer[strlen(buffer) - 1] != '\n')) count++;
 	return count;
 }
 
-void forward_puzzle(FILE *fp, char *buffer) {
+void forward_puzzle(FILE *fp) {
+	char buffer[MAX_WORD_LENGTH + 2];
 	for (unsigned int i = 0; i < PUZZLE_LENGTH / MAX_WORD_LENGTH; ++i)
 		fgets(buffer, MAX_WORD_LENGTH + 2, fp);
 }
 
 void load_words(char words[][MAX_WORD_LENGTH + 1], char *file_name) {
 	FILE *fp = open_file(file_name);
-	char buffer[MAX_WORD_LENGTH + 2];
-	forward_puzzle(fp, buffer);
-	load_word(words, fp, buffer);
+	forward_puzzle(fp);
+	load_word(words, fp);
 	close_file(fp);
 }
 
-void load_word(char words[][MAX_WORD_LENGTH + 1], FILE *fp, char *buffer) {
+void load_word(char words[][MAX_WORD_LENGTH + 1], FILE *fp) {
+	char buffer[MAX_WORD_LENGTH + 2];
 	unsigned int count = 0;
 	while (fgets(buffer, MAX_WORD_LENGTH + 1, fp)) {
 		if (strlen(buffer) > 1 || (strlen(buffer) == 1 && buffer[strlen(buffer) - 1] != '\n')) {
