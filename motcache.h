@@ -20,9 +20,9 @@ the program prints this help and exit.\n\
 enum error {
     OK                      = 0,
     ERREUR_NB_ARGS          = 1,
-    ERREUR_FILE_FORMAT	    = 3,
-    ERREUR_OPEN_FILE	    = 4,
-    ERREUR_CLOSE_FILE	    = 5
+    ERREUR_FILE_FORMAT      = 3,
+    ERREUR_OPEN_FILE        = 4,
+    ERREUR_CLOSE_FILE       = 5
 };
 
 
