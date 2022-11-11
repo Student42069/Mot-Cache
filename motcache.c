@@ -17,7 +17,7 @@ FILE* open_file(const char *file_name) {
 	return fptr;
 }
 
-void checkargs(int argc) {
+void checkargs(const int argc) {
 	if (argc != 2) {
 		printf("%s\n", "nombre arguments invalide");
 		printf(USAGE, "./motcache");
@@ -25,7 +25,7 @@ void checkargs(int argc) {
 	}
 }
 
-void load_puzzle(char *puzzle, char *file_name) {
+void load_puzzle(char *puzzle, const char *file_name) {
 	FILE *fp = open_file(file_name);
 	char buffer[MAX_WORD_LENGTH + 2];
 	for (unsigned int i = 0; i < PUZZLE_LENGTH / MAX_WORD_LENGTH; ++i) {
@@ -36,7 +36,7 @@ void load_puzzle(char *puzzle, char *file_name) {
 	close_file(fp);
 }
 
-unsigned int count_words(char *file_name) {
+unsigned int count_words(const char *file_name) {
 	FILE *fp = open_file(file_name);
 	forward_puzzle(fp);
 	unsigned int count = count_only_words(fp);
@@ -58,7 +58,7 @@ void forward_puzzle(FILE *fp) {
 		fgets(buffer, MAX_WORD_LENGTH + 2, fp);
 }
 
-void load_words(char words[][MAX_WORD_LENGTH + 1], char *file_name) {
+void load_words(char words[][MAX_WORD_LENGTH + 1], const char *file_name) {
 	FILE *fp = open_file(file_name);
 	forward_puzzle(fp);
 	load_word(words, fp);
@@ -70,63 +70,68 @@ void load_word(char words[][MAX_WORD_LENGTH + 1], FILE *fp) {
 	unsigned int count = 0;
 	while (fgets(buffer, MAX_WORD_LENGTH + 1, fp)) {
 		if (strlen(buffer) > 1 || (strlen(buffer) == 1 && buffer[strlen(buffer) - 1] != '\n')) {
-			if(buffer[strlen(buffer) - 1] == '\n') buffer[strlen(buffer) - 1] = '\0';
+			if(buffer[strlen(buffer) - 1] == '\n') 
+				buffer[strlen(buffer) - 1] = '\0';
 			strcpy(words[count++], buffer);
 		}
 	}
 }
 
-void update_unused_letters(char *unused_letters, unsigned int *used_positions, unsigned int num_found) {
+void update_unused_letters(char *unused_letters, const unsigned int *used_positions, const unsigned int num_found) {
     unsigned int i;
 	for (i = 0; i < num_found; ++i)
 		unused_letters[used_positions[i]] = ' ';
 }
 
-unsigned int check(char *word, char *puzzle, char *unused_letters, unsigned int position, unsigned int direction) {
-	char found[13] = {puzzle[position]};
-	unsigned int used_positions[MAX_WORD_LENGTH] = {position};
-	while (strstr(word, found)) {
-		position = position + direction;
-		used_positions[strlen(found)] = position;
-		char char_to_string[2] = {puzzle[position], '\0'};
-		strcat(found, char_to_string);
-		if (strcmp(word, found) == 0) {
-			update_unused_letters(unused_letters, used_positions, (int) strlen(found));
-			return 1;
-		}
+unsigned int is_found(const char *word, char *found, char *unused_letters, const unsigned int *used_positions, const char *char_to_string) {
+	strcat(found, char_to_string);
+	if (strcmp(word, found) == 0) {
+		update_unused_letters(unused_letters, used_positions, (int) strlen(found));
+		return 1;
 	}
 	return 0;
 }
 
-unsigned int check_right(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+unsigned int check(const char *word, const char *puzzle, char *unused_letters, unsigned int position, const unsigned int direction) {
+	char found[13] = {puzzle[position]};
+	unsigned int used_positions[MAX_WORD_LENGTH] = {position};
+	while (strstr(word, found)) {
+		used_positions[strlen(found)] = position = position + direction;
+		char char_to_string[] = {puzzle[position], '\0'};
+		if (is_found(word, found, unused_letters, used_positions, char_to_string)) return 1;
+	}
+	return 0;
+}
+
+unsigned int check_right(const char *word, const char *puzzle, char *unused_letters, const unsigned int position) {
 	if ((12 - (position % 12)) >= strlen(word))
 		if (check(word, puzzle, unused_letters, position, RIGHT))
 			return 1;
 	return 0;
 }
 
-unsigned int check_left(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+unsigned int check_left(const char *word, const char *puzzle, char *unused_letters, const unsigned int position) {
 	if (((position % 12) + 1) >= strlen(word))
 		if (check(word, puzzle, unused_letters, position, LEFT))
 			return 1;
 	return 0;
 }
 
-unsigned int check_up(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+unsigned int check_up(const char *word, const char *puzzle, char *unused_letters, const unsigned int position) {
 	if (((position / 12) + 1) >= strlen(word))
 		if (check(word, puzzle, unused_letters, position, UP))
 			return 1;
 	return 0;
 }
 
-unsigned int check_down(char *word, char *puzzle, char *unused_letters, unsigned int position) {
+unsigned int check_down(const char *word, const char *puzzle, char *unused_letters, const unsigned int position) {
 	if (12 - ((position / 12) >= strlen(word)))
 		if (check(word, puzzle, unused_letters, position, DOWN))
 			return 1;
 	return 0;
 }
 
-unsigned int search_word(char *word, char *puzzle, char *unused_letters) {
+unsigned int search_word(const char *word, const char *puzzle, char *unused_letters) {
 	unsigned int position;
 	for (position = 0; position < strlen(puzzle); ++position)
 		if (puzzle[position] == word[0]) {
@@ -138,7 +143,7 @@ unsigned int search_word(char *word, char *puzzle, char *unused_letters) {
 	return 0;
 }
 
-void print_unused_letters(char *unused_letters) {
+void print_unused_letters(const char *unused_letters) {
 	long unsigned int i;
 	for (i = 0; i < strlen(unused_letters); ++i)
 		if (unused_letters[i] != ' ')
@@ -146,13 +151,18 @@ void print_unused_letters(char *unused_letters) {
 	puts("");
 }
 
-void solve_puzzle(char *puzzle, char words[][MAX_WORD_LENGTH + 1], unsigned int num_words) {
+void handle_not_found(const char words[][MAX_WORD_LENGTH + 1], const unsigned int i) {
+	printf("Un mot n'a pas ete trouve, cela ne devrait pas se produire %s\n", words[i]);
+	exit(ERREUR_FILE_FORMAT);
+}
+
+void solve_puzzle(const char *puzzle, const char words[][MAX_WORD_LENGTH + 1], const unsigned int num_words) {
 	char unused_letters[strlen(puzzle)];
 	strcpy(unused_letters, puzzle);
 	unsigned int i;
 	for (i = 0; i < num_words; ++i)
-		if (!search_word(words[i], puzzle, unused_letters))
-			printf("Un mot n'a pas ete trouve, cela ne devrait pas se produire :( %s\n", words[i]);
+		if (!search_word(words[i], puzzle, unused_letters)) 
+			handle_not_found(words, i);
 	print_unused_letters(unused_letters);
 }
 
