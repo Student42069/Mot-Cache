@@ -31,6 +31,8 @@ Le contenu du projet:
 * `motcache.c`: code source, implementation de l'interface
 * `.gitignore`: ignorer certains fichiers lors de la gestion des version
 * `.gitla-ci.yml`: instructions d'intégration continu avec GitLab CI/CD
+* `tests/MANDOLINE.txt`: fichier contenant un exemple de grille pouvant 
+être résolu par le programme
 
 [Contraintes du travail](sujet.pdf)
 
@@ -60,6 +62,11 @@ make
 Finalement pour exécuter le programme avec un mot caché contenu dans un fichier :
 ```sh
 ./motcache <FICHIER_TEXTE>
+```
+
+Par exemple avec le fichier fourni contenant une grille à résoudre :
+```sh
+./motcache tests/MANDOLINE.txt
 ```
 
 Les cas d'erreur gérés sont :
